@@ -23,7 +23,7 @@ def problem2():
     string1 = """(define (problem BLOCKS-3)
     (:domain CARDS)
     (:objects play discard - move
-              n0 n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 - number
+              n0 n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11 n12 n13 n14 n15 n16 - number
               red white yellow green - colour
               )
     (:INIT 
@@ -33,6 +33,8 @@ def problem2():
 """
     string2 = """     (tokens1 n1) (tokens2 n1)
      (succ n0 n1) (succ n1 n2) (succ n2 n3) (succ n3 n4) (succ n4 n5) (succ n5 n6)
+     (succ n6 n7) (succ n7 n8) (succ n8 n9) (succ n9 n10) (succ n10 n11) (succ n11 n12)
+     (succ n12 n13) (succ n13 n14) (succ n14 n15) (succ n15 n16)
      (samecolour red red) (samecolour white white) (samecolour yellow yellow)
      (samecolour green green)
      (playable_copy red n1) (playable_copy white n1) (playable_copy yellow n1)
@@ -299,7 +301,7 @@ def domain2():
          :parameters (?time - number ?numa - number ?coloura - colour ?numb - number
                       ?colourb - colour)
          :precondition (AND (istime_copy ?time) (inhand1_copy ?coloura ?numa ?time)
-                            (inhand2_copy ?colourb ?numb ?time))
+                            (inhand2_copy ?colourb ?numb ?time) (played1 play ?time))
          :effect
          (AND (played1_copy play ?time)
            (played2_copy play ?time)
@@ -358,7 +360,8 @@ def domain2():
   )
     (:action discard_play_copy
          :parameters (?time - number ?numb - number ?colourb - colour)
-         :precondition (AND (istime_copy ?time) (inhand2_copy ?colourb ?numb ?time))
+         :precondition (AND (istime_copy ?time) (inhand2_copy ?colourb ?numb ?time)
+                        (played1 discard ?time))
          :effect
          (AND (played1_copy discard ?time)
            (played2_copy play ?time)
@@ -459,7 +462,8 @@ def domain2():
   )
     (:action play_discard_copy
          :parameters (?time - number ?numa - number ?coloura - colour)
-         :precondition (AND (istime_copy ?time) (inhand1_copy ?coloura ?numa ?time))
+         :precondition (AND (istime_copy ?time) (inhand1_copy ?coloura ?numa ?time)
+                        (played1 play ?time))
          :effect
          (AND (played1_copy play ?time)
            (played2_copy discard ?time)
@@ -516,7 +520,7 @@ def domain2():
   )
       (:action discard_discard_copy
          :parameters (?time - number)
-         :precondition (AND (istime_copy ?time))
+         :precondition (AND (istime_copy ?time) (played1 discard ?time))
          :effect
          (AND (played1_copy discard ?time)
            (played2_copy discard ?time)
