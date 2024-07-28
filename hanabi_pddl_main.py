@@ -386,21 +386,22 @@ def passive_ant_PDDL(goalstring,hand1,hand2,plan,agent):
     string2 += hand2.makePDDLstring(False)+hand2.makePDDLstring(True)
     string3 = stringlist[1]
     string5 = stringlist[2]
-    otheragent = 3 - agent
+#    otheragent = 3 - agent
     goal = stringtoformula(goalstring)
     othergoal = Negation(goal.makecopy())
-    sameplan = sameplanformula(otheragent, len(plan))
+#    sameplan = sameplanformula(otheragent, len(plan))
     forceplan = plantoformula(plan, agent)
     timelimit = timeformula(len(plan))
     
-    f1 = conjunctlist([goal,forceplan,othergoal,sameplan,timelimit,timelimit.makecopy()])
+#    f1 = conjunctlist([goal,forceplan,othergoal,sameplan,timelimit,timelimit.makecopy()])
+    f1 = conjunctlist([goal,forceplan,othergoal,timelimit,timelimit.makecopy()])
     string4 = f1.PDDL()
     print("Here is the domain:")
     print(domain2())
     print("Here is the problem")
     print(string1+string2+string3+string4+string5)
 
-planlength = 9
+planlength = 7
 
 planc = ["discard"]*planlength
 
@@ -416,7 +417,7 @@ while not ready:
     hand1, hand2 = deck1.drawhands(planlength)
     plan = randomplan(planlength)
     b = passive_ant_game(plan,1,hand1,hand2,goal)
-    if b == True:
+    if b == False:
         ready = True
 
 passive_ant_PDDL(goalstring,hand1,hand2,plan,1)
