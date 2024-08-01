@@ -436,6 +436,26 @@ passive_ant_PDDL(goalstring,hand1,hand2,plan,1)
 #         end = time()
 #         print((end - start)/5)
 #         count += 1
-        
+
+count = 0
+while count != 10:
+  #   print("i")
+    deck1 = Deck()
+    hand1, hand2 = deck1.drawhands(planlength)
+    plan = randomplan(planlength)
+    b = passive_ant_game(plan,1,hand1,hand2,goal)
+    if b == False:
+        k = 1
+        finaltime = 0
+        while finaltime == 0 and k < 100000:
+            start = time()
+            for i in range(k):
+                b = passive_ant_game(plan,1,hand1,hand2,goal)
+            end = time()
+            finaltime = (end-start)/k
+            k = k*10
+        print("f "+str(finaltime))
+        print(k)
+        count += 1
         
 
