@@ -1,6 +1,7 @@
 from hanabi_pddl_strings import problem1, problem2, domain1, domain2
 from random import shuffle, randint
 from time import time
+import os
 
 class Conjunction:
     def __init__(self,part1,part2):
@@ -317,8 +318,24 @@ def conjunctlist(list1):
         part2 = conjunctlist(list1)
         return Conjunction(part1,part2)
     
-def timeformula(time):
-    return Atomic("istime","n"+str(time+1))
+def timeformula(num):
+    return Atomic("istime","n"+str(num+1))
+
+def generatenumbers(num):
+    limit = num+2
+    string = ""
+    for i in range(limit):
+        string += "n"+str(i)+" "
+    return string
+
+def finishtime(num):
+    return "(isfinishtime n"+str(num+1)+") "
+
+def succstring(num):
+    string = ""
+    for i in range(num+1):
+        string += "(succ n"+str(i)+" n"+str(i+1)+") "
+    return string
 
 def plantoformula(plan,agent):
     index = 1
@@ -327,6 +344,14 @@ def plantoformula(plan,agent):
         newlist.append(Atomic("played"+str(agent),i+" n"+str(index)))
         index += 1
     return conjunctlist(newlist)
+
+def plantovars(plan,agent):
+    index = 1
+    string= ""
+    for i in plan:
+        string +="(played"+str(agent)+" "+i+" n"+str(index)+")"
+        index += 1
+    return string
 
 def sameplanformula(agent,length):
     newlist = []
@@ -382,80 +407,39 @@ def active_ant_PDDL(string,plan,agent):
 def passive_ant_PDDL(goalstring,hand1,hand2,plan,agent):
     stringlist = problem2()
     string1 = stringlist[0]
-    string2 = hand1.makePDDLstring(False)+hand1.makePDDLstring(True)
-    string2 += hand2.makePDDLstring(False)+hand2.makePDDLstring(True)
+    string2 = generatenumbers(len(plan))
     string3 = stringlist[1]
+    string4 = hand1.makePDDLstring(False)+hand1.makePDDLstring(True)
+    string4 += hand2.makePDDLstring(False)+hand2.makePDDLstring(True)
+    string4 += finishtime(len(plan))+succstring(len(plan))+plantovars(plan,agent)
     string5 = stringlist[2]
-#    otheragent = 3 - agent
+    string7 = stringlist[3]
     goal = stringtoformula(goalstring)
     othergoal = Negation(goal.makecopy())
-#    sameplan = sameplanformula(otheragent, len(plan))
-    forceplan = plantoformula(plan, agent)
-    timelimit = timeformula(len(plan))
-    
+    timelimit = timeformula(len(plan))   
 #    f1 = conjunctlist([goal,forceplan,othergoal,sameplan,timelimit,timelimit.makecopy()])
-    f1 = conjunctlist([goal,forceplan,othergoal,timelimit,timelimit.makecopy()])
-    string4 = f1.PDDL()
-    print("Here is the domain:")
-    print(domain2())
-    print("Here is the problem")
-    print(string1+string2+string3+string4+string5)
+    f1 = conjunctlist([goal,othergoal,timelimit,timelimit.makecopy()])
+    string6 = f1.PDDL()
+    return string1+string2+string3+string4+string5+string6+string7
 
-planlength = 7
+def getresp2(planlength,resp):
+    ready = False
+    while not ready:
+        deck1 = Deck()
+        hand1, hand2 = deck1.drawhands(planlength)
+        plan = randomplan(planlength)
+        x=passive_ant_PDDL(goalstring,hand1,hand2,plan,1)
+        file2 = open("problem.pddl", 'w+')
+        file2.write(x)
+        file2.close()
+        stream = os.popen('/home/tim/fast-downward.sif --alias lama-first --search-time-limit 120s  domain.pddl problem.pddl')
+        output = stream.read()
+        stream.close()
+        if ("Solution found!" in output) == resp:
+            ready = True
+    return hand1,hand2,plan
 
-planc = ["discard"]*planlength
-
-
-ready = False
 
 goalstring = "(NOT isfinished red AND NOT isfinished white)"
 goal = stringtoformula(goalstring)
-
-while not ready:
-    print("i")
-    deck1 = Deck()
-    hand1, hand2 = deck1.drawhands(planlength)
-    plan = randomplan(planlength)
-    b = passive_ant_game(plan,1,hand1,hand2,goal)
-    if b == False:
-        ready = True
-
-passive_ant_PDDL(goalstring,hand1,hand2,plan,1)
-
-# count = 0
-# while count != 40:
-#  #   print("i")
-#     deck1 = Deck()
-#     hand1, hand2 = deck1.drawhands(planlength)
-#     plan = randomplan(planlength)
-#     b = passive_ant_game(plan,1,hand1,hand2,goal)
-#     if b == True:
-#         start = time()
-#         for i in range(5):
-#             b = passive_ant_game(plan,1,hand1,hand2,goal)
-#         end = time()
-#         print((end - start)/5)
-#         count += 1
-
-count = 0
-while count != 10:
-  #   print("i")
-    deck1 = Deck()
-    hand1, hand2 = deck1.drawhands(planlength)
-    plan = randomplan(planlength)
-    b = passive_ant_game(plan,1,hand1,hand2,goal)
-    if b == False:
-        k = 1
-        finaltime = 0
-        while finaltime == 0 and k < 100000:
-            start = time()
-            for i in range(k):
-                b = passive_ant_game(plan,1,hand1,hand2,goal)
-            end = time()
-            finaltime = (end-start)/k
-            k = k*10
-        print("f "+str(finaltime))
-        print(k)
-        count += 1
-        
 
