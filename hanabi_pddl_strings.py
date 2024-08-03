@@ -235,7 +235,7 @@ def domain2():
                (failure_copy)
                )
   (:action finish
-         :parameters (?time)
+         :parameters (?time - number)
          :precondition (AND (NOT (finished)) (isfinishtime ?time) (istime ?time)) 
          :effect (finished))
 
